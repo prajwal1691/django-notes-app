@@ -1,0 +1,56 @@
+pipeline {
+    agent {
+        label 'slave-01'
+    }
+    environment {
+        AWS_ACCOUNT_ID="975508100636"
+        AWS_DEFAULT_REGION="ap-south-1"
+        IMAGE_REPO_NAME="prajwal1691"
+        IMAGE_TAG="v${env.BUILD_NUMBER}"
+        REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
+    }
+
+    stages {
+        stage('Logging into AWS ECR') {
+            steps {
+                script {
+                    sh "aws ecr get-login-password - region ${AWS_DEFAULT_REGION} | docker login - username AWS - password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
+                }
+            
+            }
+        }
+        stage("Code") {
+            steps {
+                echo "Cloning the code"
+                git url: "https://github.com/prajwal1691/django-notes-app.git", branch: "main"
+            }
+        }
+        stage("build") {
+            steps {
+                echo "Building the image"
+                sh "docker build -t my-note-app:latest ."
+            }
+        }
+        stage("Push to Docker Hub") {
+            steps {
+                echo "Pushing the image to Docker hub"
+                    script {
+                        sh "docker tag my-note-app:latest ${REPOSITORY_URI}:$IMAGE_TAG"
+                        sh "docker tag my-note-app:latest ${REPOSITORY_URI}:latest"
+                        sh "docker push ${REPOSITORY_URI}:$IMAGE_TAG"
+                        sh "docker push ${REPOSITORY_URI}:latest"
+                        sh "docker rmi -f my-note-app:latest"
+                        sh "docker rmi -f ${REPOSITORY_URI}:$IMAGE_TAG"
+                        sh "docker rmi -f ${REPOSITORY_URI}:latest"
+                    }
+                
+            }
+        }
+        stage("Deploy") {
+            steps {
+                echo "Deploying to container"
+                sh "docker-compose down && docker-compose up -d"
+            }
+        }
+    }
+}
