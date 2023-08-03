@@ -3,4 +3,4 @@ services:
   web:
     image: 975508100636.dkr.ecr.ap-south-1.amazonaws.com/prajwal1691:latest
     ports:
-      - "8000:8000"
+      - "8001:8000"
