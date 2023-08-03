@@ -1,6 +1,6 @@
-version : "3.3"
-services :
-  web :
-     image : prajwal1691:latest 975508100636.dkr.ecr.ap-south-1.amazonaws.com/prajwal1691:latest
-     ports :
-         - "8000:8000"
+version: "3.3"
+services:
+  web:
+    image: 975508100636.dkr.ecr.ap-south-1.amazonaws.com/prajwal1691:latest
+    ports:
+      - "8000:8000"
