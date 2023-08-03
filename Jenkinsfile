@@ -35,6 +35,7 @@ pipeline {
         stage("Deploy") {
             steps {
                 echo "Deploying to container"
+                sh "apt update && apt install -y docker-compose"
                 sh "docker-compose down && docker-compose up -d"
             }
         }
